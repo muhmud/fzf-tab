@@ -111,9 +111,7 @@
   local _ftb_query _ftb_complist=() _ftb_headers=() command opts
   -ftb-generate-complist # sets `_ftb_complist`
 
-  -ftb-zstyle -s continuous-trigger continuous_trigger || {
-    [[ $OSTYPE == msys ]] && continuous_trigger=// || continuous_trigger=/
-  }
+  -ftb-zstyle -s continuous-trigger continuous_trigger || continuous_trigger=l
 
   case $#_ftb_complist in
     0) return 1;;
@@ -127,9 +125,9 @@
       -ftb-generate-query      # sets `_ftb_query`
       -ftb-generate-header     # sets `_ftb_headers`
       -ftb-zstyle -s print-query print_query || print_query=alt-enter
-      -ftb-zstyle -s accept-line accept_line
+      -ftb-zstyle -s accept-line accept_line || accept_line=enter
 
-      choices=("${(@f)"$(builtin print -rl -- $_ftb_headers $_ftb_complist | -ftb-fzf)"}")
+      choices=("${(@f)"$(builtin print -rl -- $_ftb_headers $_ftb_complist | -ftb-fzf $_ftb_continue_last)"}")
       ret=$?
       # choices=(query_string expect_key returned_word)
 
@@ -231,6 +229,7 @@ fzf-tab-complete() {
   done
   echoti cnorm >/dev/tty 2>/dev/null
   zle .redisplay
+  echo $ret >> /tmp/100.txt
   (( _ftb_accept )) && zle .accept-line
   return $ret
 }

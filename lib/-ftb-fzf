@@ -3,6 +3,12 @@
 local tmp_dir=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
 [[ -d $tmp_dir ]] || command mkdir $tmp_dir
 
+echo "$1" > /tmp/got
+local mode=insert
+if [[ "$1" == "1" ]]; then
+  mode=browse
+fi
+
 local ftb_preview_init="
 zmodload zsh/mapfile
 local -a _ftb_compcap=(\"\${(@f)mapfile[$tmp_dir/compcap.$$]}\")
@@ -24,7 +30,7 @@ if (( \$+ctxt[realdir] )); then
 fi
 $(typeset -p words)
 "
-local binds=tab:down,btab:up,change:top,ctrl-space:toggle
+local binds=change:top,ctrl-space:toggle,alt-\,:down,alt-.:up
 local fzf_command fzf_flags fzf_preview debug_command tmp switch_group fzf_pad
 local ret=0
 
@@ -77,12 +83,16 @@ _ftb_query="${_ftb_query}$(command "$dd" bs=1G count=1 status=none iflag=nonbloc
 
 $fzf_command \
   --ansi \
+  --mode $mode \
+  --bind "bspace:no-input-exit+backward-delete-char,tab:down,btab:up" \
+  --bind-mode browse "bspace:no-input-exit+browse-mode+backward-delete-char" \
   --bind=$binds \
   --bind="${switch_group[1]}:reload($reload_command -1),${switch_group[2]}:reload($reload_command 1)" \
   --color=hl:$(( header_lines == 0 ? 188 : 255 )) \
   --cycle \
   --delimiter='\x00' \
-  --expect=$continuous_trigger,$print_query,$accept_line \
+  --expect=$print_query,$accept_line \
+  --expect-mode browse $continuous_trigger,$print_query,$accept_line,tab \
   --header-lines=$header_lines \
   --height=${FZF_TMUX_HEIGHT:=$(( lines > LINES / 3 * 2 ? LINES / 3 * 2 : lines ))} \
   --layout=reverse \
