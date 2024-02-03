@@ -84,6 +84,7 @@ _ftb_query="${_ftb_query}$(command "$dd" bs=1G count=1 status=none iflag=nonbloc
 $fzf_command \
   --ansi \
   --mode $mode \
+  --bind "load:small-result-browse" \
   --bind "bspace:no-input-exit+backward-delete-char,tab:down,btab:up" \
   --bind-mode browse "bspace:no-input-exit+browse-mode+backward-delete-char" \
   --bind=$binds \
